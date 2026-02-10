@@ -1,1 +1,0 @@
-# Green AI Models Package
