@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-Synchrony API</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 20px;
+            background: rgba(0,255,0,0.2);
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .endpoint {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .test-btn {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .test-btn:hover {
+            background: #00cc66;
+        }
+        #result {
+            background: rgba(0,0,0,0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 K-Synchrony API</h1>
+        <div class="status">
+            <strong>✅ Backend is Live!</strong>
+        </div>
+        
+        <h2>📡 Available Endpoints:</h2>
+        
+        <div class="endpoint">
+            <strong>GET</strong> /api/health
+        </div>
+        
+        <div class="endpoint">
+            <strong>POST</strong> /api/trigger
+        </div>
+        
+        <h2>🧪 Test API:</h2>
+        
+        <button class="test-btn" onclick="testHealth()">Test Health Check</button>
+        <button class="test-btn" onclick="testTrigger()">Test Trigger</button>
+        
+        <div id="result"></div>
+        
+        <h2>📚 Documentation:</h2>
+        <p>This is the K-Synchrony backend API for ESP32 IoT devices with Kaspa blockchain integration.</p>
+        
+        <h3>ESP32 Usage:</h3>
+        <div class="endpoint">
+const char* serverUrl = "https://k-synchrony.vercel.app/api/trigger";
+        </div>
+    </div>
+
+    <script>
+        async function testHealth() {
+            const result = document.getElementById('result');
+            result.textContent = 'Testing /api/health...\n';
+            
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                result.textContent = 'Response:\n' + JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function testTrigger() {
+            const result = document.getElementById('result');
+            result.textContent = 'Testing /api/trigger...\n';
+            
+            try {
+                const response = await fetch('/api/trigger', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        device: 'door1',
+                        action: 'open',
+                        sensor: 'test'
+                    })
+                });
+                const data = await response.json();
+                result.textContent = 'Response:\n' + JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
