@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: k-synchrony-backend
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: node dist/examples/esp32-backend-server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000

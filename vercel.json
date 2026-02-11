@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "examples/esp32-backend-server.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "examples/esp32-backend-server.ts"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
