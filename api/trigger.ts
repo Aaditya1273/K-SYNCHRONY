@@ -155,7 +155,7 @@ export default async function handler(
 
     // Fetch real balance
     const balanceData = await getKaspaBalance(WALLET_ADDRESS, KASPA_API);
-    kaspaData.balance = balanceData.balance || 0;
+    kaspaData.balance = (balanceData as any).balance || 0;
     console.log(`✅ Balance retrieved: ${kaspaData.balance} sompi`);
 
     // Try to get UTXOs (optional)
