@@ -12,7 +12,10 @@
     "demo:payment": "ts-node examples/payment-example.ts",
     "demo:gaming": "ts-node examples/gaming-example.ts",
     "demo:iot": "ts-node examples/iot-example.ts",
-    "demo:all": "ts-node examples/full-demo.ts"
+    "demo:all": "ts-node examples/full-demo.ts",
+    "demo:fleet": "ts-node examples/iot-fleet-management.ts",
+    "demo:tournament": "ts-node examples/advanced-gaming-example.ts",
+    "demo:dashboard": "ts-node examples/merchant-dashboard-example.ts"
   },
   "keywords": [
     "kaspa",
