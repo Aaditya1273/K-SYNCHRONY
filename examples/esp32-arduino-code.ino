@@ -20,13 +20,14 @@
 // CONFIGURATION - CHANGE THESE
 // ═══════════════════════════════════════
 
-// WiFi credentials
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
+// WiFi credentials (Wokwi Simulator)
+const char* ssid = "Wokwi-GUEST";
+const char* password = "";
 
-// Backend server URL (your computer's IP address)
-// Find your IP: Windows: ipconfig | Mac/Linux: ifconfig
-const char* serverUrl = "http://192.168.1.100:3000/api/trigger";
+// Backend server URL (MUST BE PUBLIC URL)
+// Deploy backend to Railway/Render/Vercel first, then update this URL
+// Example: https://your-app.railway.app/api/trigger
+const char* serverUrl = "https://YOUR-BACKEND-URL.railway.app/api/trigger";
 
 // Device configuration
 const char* deviceId = "door1";
@@ -70,33 +71,44 @@ void setup() {
 }
 
 void loop() {
-  // Read button state
+  // AUTO TRIGGER MODE (for Wokwi simulator testing)
+  // Triggers automatically every 5 seconds
+  // Perfect for testing backend without physical button
+  
+  Serial.println("\n🔘 Auto Trigger!");
+  digitalWrite(LED_PIN, HIGH);
+  
+  // Send request to backend
+  sendTriggerRequest("open", "auto_trigger");
+  
+  // Wait 5 seconds before next trigger
+  delay(5000);
+  digitalWrite(LED_PIN, LOW);
+  delay(1000);
+  
+  // Note: For physical button, uncomment the code below and comment out above
+  /*
   int buttonState = digitalRead(BUTTON_PIN);
   
-  // Check if button was pressed (with debouncing)
   if (buttonState == LOW && lastButtonState == HIGH) {
     unsigned long currentTime = millis();
     
     if ((currentTime - lastDebounceTime) > debounceDelay) {
       lastDebounceTime = currentTime;
       
-      // Button pressed!
       Serial.println("\n🔘 Button Pressed!");
       digitalWrite(LED_PIN, HIGH);
       
-      // Send request to backend
       sendTriggerRequest("open", "button_pressed");
       
-      // Wait a bit
       delay(1000);
       digitalWrite(LED_PIN, LOW);
     }
   }
   
   lastButtonState = buttonState;
-  
-  // Small delay to prevent CPU overload
   delay(10);
+  */
 }
 
 /**
