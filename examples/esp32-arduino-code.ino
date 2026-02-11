@@ -25,9 +25,8 @@ const char* ssid = "Wokwi-GUEST";
 const char* password = "";
 
 // Backend server URL (MUST BE PUBLIC URL)
-// Deploy backend to Railway/Render/Vercel first, then update this URL
-// Example: https://your-app.railway.app/api/trigger
-const char* serverUrl = "https://YOUR-BACKEND-URL.railway.app/api/trigger";
+// Your deployed Vercel backend
+const char* serverUrl = "https://k-synchrony.vercel.app/api/trigger";
 
 // Device configuration
 const char* deviceId = "door1";
