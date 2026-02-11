@@ -161,14 +161,14 @@ export default async function handler(
 
     // Fetch real balance with automatic endpoint failover
     const balanceResult = await getKaspaBalance(WALLET_ADDRESS);
-    kaspaData.balance = balanceResult.data.balance || 0;
+    kaspaData.balance = (balanceResult.data as any).balance || 0;
     const workingEndpoint = balanceResult.endpoint;
     console.log(`✅ Balance retrieved: ${kaspaData.balance} sompi from ${workingEndpoint}`);
 
     // Try to get UTXOs (optional, but shows we're really connected)
     try {
       const utxos = await getUTXOs(WALLET_ADDRESS, workingEndpoint);
-      kaspaData.utxoCount = utxos?.length || 0;
+      kaspaData.utxoCount = Array.isArray(utxos) ? utxos.length : 0;
       console.log(`📦 UTXOs found: ${kaspaData.utxoCount}`);
     } catch (utxoError) {
       console.log('⚠️ Could not fetch UTXOs (non-critical)');
