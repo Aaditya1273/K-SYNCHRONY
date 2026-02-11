@@ -29,7 +29,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@kaspa/core-lib": "^0.13.0",
+    "kaspa": "^0.13.0",
     "axios": "^1.6.0",
     "ws": "^8.16.0",
     "qrcode": "^1.5.3",

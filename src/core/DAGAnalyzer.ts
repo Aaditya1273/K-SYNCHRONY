@@ -127,7 +127,9 @@ export class DAGAnalyzer {
     // Limit cache size
     if (this.blockCache.size > 100) {
       const firstKey = this.blockCache.keys().next().value;
-      this.blockCache.delete(firstKey);
+      if (firstKey) {
+        this.blockCache.delete(firstKey);
+      }
     }
 
     return block;
