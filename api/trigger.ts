@@ -11,44 +11,74 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * - Real blockchain verification
  */
 
-// Kaspa TN10 Community API endpoints
-const KASPA_API_BASE = "https://api-tn10.kaspa.org";
+// Kaspa API endpoints with fallback chain
+const KASPA_API_ENDPOINTS = [
+  "https://api.kaspa.org",           // Mainnet API (most stable)
+  "https://api-tn10.kaspa.org",      // TN10 (currently down)
+  "https://api.kaspa.network",       // Alternative
+];
+
+// Use proxy if provided in environment, otherwise use direct endpoints
+const KASPA_PROXY = process.env.KASPA_PROXY_URL;
+const KASPA_API_BASE = KASPA_PROXY || KASPA_API_ENDPOINTS[0];
 
 // Helper function to validate Kaspa address format
 function isValidKaspaAddress(address: string): boolean {
-  return address.startsWith('kaspatest:') || address.startsWith('kaspa:');
+  return address.startsWith('kaspatest:') || 
+         address.startsWith('kaspa:') ||
+         address.startsWith('kaspadev:') ||
+         address.startsWith('kaspasim:');
 }
 
-// Helper to fetch balance with proper error handling
+// Helper to fetch balance with proper error handling and retry logic
 async function getKaspaBalance(address: string) {
-  const url = `${KASPA_API_BASE}/addresses/${address}/balance`;
-  console.log(`🔍 Fetching balance from: ${url}`);
+  const endpoints = KASPA_PROXY ? [KASPA_PROXY] : KASPA_API_ENDPOINTS;
   
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+  let lastError: Error | null = null;
+  
+  for (const endpoint of endpoints) {
+    try {
+      const url = `${endpoint}/addresses/${address}/balance`;
+      console.log(`🔍 Trying endpoint: ${url}`);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Success with endpoint: ${endpoint}`);
+      return { data, endpoint };
+      
+    } catch (error: any) {
+      console.log(`❌ Failed with ${endpoint}: ${error.message}`);
+      lastError = error;
+      continue; // Try next endpoint
     }
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Kaspa API error (${response.status}): ${errorText}`);
   }
-
-  return await response.json();
+  
+  // All endpoints failed
+  throw new Error(`All Kaspa endpoints failed. Last error: ${lastError?.message}`);
 }
 
 // Helper to get UTXOs (for transaction creation)
-async function getUTXOs(address: string) {
-  const url = `${KASPA_API_BASE}/addresses/${address}/utxos`;
+async function getUTXOs(address: string, endpoint: string) {
+  const url = `${endpoint}/addresses/${address}/utxos`;
   
   const response = await fetch(url, {
     method: 'GET',
     headers: {
       'Accept': 'application/json'
-    }
+    },
+    signal: AbortSignal.timeout(5000)
   });
 
   if (!response.ok) {
@@ -127,16 +157,17 @@ export default async function handler(
   let kaspaError: string | null = null;
 
   try {
-    console.log('🚀 Attempting Kaspa TN10 connection...');
+    console.log('🚀 Attempting Kaspa connection with retry logic...');
 
-    // Fetch real balance
-    const balanceResponse = await getKaspaBalance(WALLET_ADDRESS);
-    kaspaData.balance = balanceResponse.balance || 0;
-    console.log(`✅ Balance retrieved: ${kaspaData.balance} sompi`);
+    // Fetch real balance with automatic endpoint failover
+    const balanceResult = await getKaspaBalance(WALLET_ADDRESS);
+    kaspaData.balance = balanceResult.data.balance || 0;
+    const workingEndpoint = balanceResult.endpoint;
+    console.log(`✅ Balance retrieved: ${kaspaData.balance} sompi from ${workingEndpoint}`);
 
     // Try to get UTXOs (optional, but shows we're really connected)
     try {
-      const utxos = await getUTXOs(WALLET_ADDRESS);
+      const utxos = await getUTXOs(WALLET_ADDRESS, workingEndpoint);
       kaspaData.utxoCount = utxos?.length || 0;
       console.log(`📦 UTXOs found: ${kaspaData.utxoCount}`);
     } catch (utxoError) {
@@ -204,7 +235,8 @@ export default async function handler(
         balanceKAS: kaspaData.balance ? (kaspaData.balance / 100000000).toFixed(8) : '0',
         utxoCount: kaspaData.utxoCount,
         walletAddress: WALLET_ADDRESS,
-        network: 'testnet-10'
+        network: WALLET_ADDRESS.startsWith('kaspatest:') ? 'testnet-10' : 'mainnet',
+        proxyUsed: !!KASPA_PROXY
       } : {
         connected: false,
         error: kaspaError
