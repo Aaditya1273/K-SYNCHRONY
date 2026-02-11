@@ -100,7 +100,7 @@ describe('IoTEngine', () => {
       const deviceId = 'sensor-006';
       await iotEngine.anchorData(deviceId, { temp: 25 });
 
-      const data = await iotEngine.queryDataByDevice(deviceId);
+      const data = await iotEngine.getDeviceData(deviceId);
 
       expect(Array.isArray(data)).toBe(true);
       expect(data.length).toBeGreaterThan(0);
@@ -111,11 +111,7 @@ describe('IoTEngine', () => {
       const now = Date.now();
       await iotEngine.anchorData(deviceId, { temp: 25 });
 
-      const data = await iotEngine.queryDataByTimeRange(
-        deviceId,
-        now - 10000,
-        now + 10000
-      );
+      const data = await iotEngine.getDeviceData(deviceId, now - 10000, now + 10000);
 
       expect(Array.isArray(data)).toBe(true);
     });
