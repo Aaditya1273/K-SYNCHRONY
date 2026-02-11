@@ -11,17 +11,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * - Real blockchain verification
  */
 
-// Kaspa API endpoints with fallback chain
-const KASPA_API_ENDPOINTS = [
-  "https://api.kaspa.org",           // Mainnet API (most stable)
-  "https://api-tn10.kaspa.org",      // TN10 (currently down)
-  "https://api.kaspa.network",       // Alternative
-];
-
-// Use proxy if provided in environment, otherwise use direct endpoints
-const KASPA_PROXY = process.env.KASPA_PROXY_URL;
-const KASPA_API_BASE = KASPA_PROXY || KASPA_API_ENDPOINTS[0];
-
 // Helper function to validate Kaspa address format
 function isValidKaspaAddress(address: string): boolean {
   return address.startsWith('kaspatest:') || 
@@ -31,42 +20,34 @@ function isValidKaspaAddress(address: string): boolean {
 }
 
 // Helper to fetch balance with proper error handling and retry logic
-async function getKaspaBalance(address: string) {
-  const endpoints = KASPA_PROXY ? [KASPA_PROXY] : KASPA_API_ENDPOINTS;
+async function getKaspaBalance(address: string, apiEndpoint: string) {
+  const url = `${apiEndpoint}/addresses/${address}/balance`;
+  console.log(`🔍 Fetching from: ${url}`);
   
-  let lastError: Error | null = null;
-  
-  for (const endpoint of endpoints) {
-    try {
-      const url = `${endpoint}/addresses/${address}/balance`;
-      console.log(`🔍 Trying endpoint: ${url}`);
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        signal: AbortSignal.timeout(5000) // 5 second timeout
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'K-Synchrony-IoT/1.0'
       }
+    });
 
-      const data = await response.json();
-      console.log(`✅ Success with endpoint: ${endpoint}`);
-      return { data, endpoint };
-      
-    } catch (error: any) {
-      console.log(`❌ Failed with ${endpoint}: ${error.message}`);
-      lastError = error;
-      continue; // Try next endpoint
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'No error text');
+      console.log(`❌ HTTP ${response.status}: ${errorText.substring(0, 200)}`);
+      throw new Error(`HTTP ${response.status}: ${errorText.substring(0, 100)}`);
     }
+
+    const data = await response.json();
+    console.log(`✅ Success! Data:`, JSON.stringify(data).substring(0, 200));
+    return data;
+    
+  } catch (error: any) {
+    console.error(`❌ Fetch failed:`, error.message);
+    throw error;
   }
-  
-  // All endpoints failed
-  throw new Error(`All Kaspa endpoints failed. Last error: ${lastError?.message}`);
 }
 
 // Helper to get UTXOs (for transaction creation)
@@ -133,7 +114,7 @@ export default async function handler(
   // 3. Get wallet address from environment
   // ============================================
   const WALLET_ADDRESS = process.env.WALLET_ADDRESS || 
-    "kaspatest:qz0h05ep5uxz9vqfp8x5t4swzjlw2af6gln34zkkx7a44rjcn489ckchhmak4";
+    "kaspatest:qz0h05ep5uxz9vqfp8x5t4swzjlw2af6gln34zkkx7a44rjcn489ch73v5r8q";
 
   if (!isValidKaspaAddress(WALLET_ADDRESS)) {
     return res.status(500).json({
@@ -142,6 +123,17 @@ export default async function handler(
       address: WALLET_ADDRESS
     });
   }
+
+  // ============================================
+  // 3.5. Determine correct network based on address
+  // ============================================
+  const isTestnet = WALLET_ADDRESS.startsWith('kaspatest:');
+  const KASPA_API = isTestnet 
+    ? "https://api-tn10.kaspa.org"  // Testnet
+    : "https://api.kaspa.org";       // Mainnet
+  
+  console.log(`🌐 Network detected: ${isTestnet ? 'TESTNET' : 'MAINNET'}`);
+  console.log(`🔗 Using API: ${KASPA_API}`);
 
   // ============================================
   // 4. Attempt REAL Kaspa blockchain integration
@@ -157,17 +149,18 @@ export default async function handler(
   let kaspaError: string | null = null;
 
   try {
-    console.log('🚀 Attempting Kaspa connection with retry logic...');
+    console.log('🚀 Attempting Kaspa connection...');
+    console.log('📍 Wallet address:', WALLET_ADDRESS);
+    console.log('🌐 API endpoint:', KASPA_API);
 
-    // Fetch real balance with automatic endpoint failover
-    const balanceResult = await getKaspaBalance(WALLET_ADDRESS);
-    kaspaData.balance = (balanceResult.data as any).balance || 0;
-    const workingEndpoint = balanceResult.endpoint;
-    console.log(`✅ Balance retrieved: ${kaspaData.balance} sompi from ${workingEndpoint}`);
+    // Fetch real balance
+    const balanceData = await getKaspaBalance(WALLET_ADDRESS, KASPA_API);
+    kaspaData.balance = balanceData.balance || 0;
+    console.log(`✅ Balance retrieved: ${kaspaData.balance} sompi`);
 
-    // Try to get UTXOs (optional, but shows we're really connected)
+    // Try to get UTXOs (optional)
     try {
-      const utxos = await getUTXOs(WALLET_ADDRESS, workingEndpoint);
+      const utxos = await getUTXOs(WALLET_ADDRESS, KASPA_API);
       kaspaData.utxoCount = Array.isArray(utxos) ? utxos.length : 0;
       console.log(`📦 UTXOs found: ${kaspaData.utxoCount}`);
     } catch (utxoError) {
@@ -198,9 +191,11 @@ export default async function handler(
     kaspaError = error.message;
     mode = 'fallback';
 
-    // Generate mock IDs for fallback
-    txId = `fallback_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-    dataHash = `mock_${Math.random().toString(36).substring(2, 18)}`;
+    // Generate realistic mock IDs for demo
+    txId = `kaspa_demo_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    dataHash = Buffer.from(JSON.stringify({ device, action, sensor, data, timestamp: Date.now() }))
+      .toString('hex')
+      .substring(0, 32);
   }
 
   // ============================================
@@ -235,8 +230,8 @@ export default async function handler(
         balanceKAS: kaspaData.balance ? (kaspaData.balance / 100000000).toFixed(8) : '0',
         utxoCount: kaspaData.utxoCount,
         walletAddress: WALLET_ADDRESS,
-        network: WALLET_ADDRESS.startsWith('kaspatest:') ? 'testnet-10' : 'mainnet',
-        proxyUsed: !!KASPA_PROXY
+        network: isTestnet ? 'testnet-10' : 'mainnet',
+        apiEndpoint: KASPA_API
       } : {
         connected: false,
         error: kaspaError
