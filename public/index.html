@@ -3,119 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>K-Synchrony API</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            max-width: 800px;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        }
-        h1 {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-        .status {
-            padding: 20px;
-            background: rgba(0,255,0,0.2);
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-        .endpoint {
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-family: 'Courier New', monospace;
-        }
-        .test-btn {
-            background: #00ff88;
-            color: #000;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 10px 5px;
-        }
-        .test-btn:hover {
-            background: #00cc66;
-        }
-        #result {
-            background: rgba(0,0,0,0.5);
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-    </style>
+    <title>K-Synchrony | Premium Blockchain Bridge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@700;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>🚀 K-Synchrony API</h1>
-        <div class="status">
-            <strong>✅ Backend is Live!</strong>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span style="font-size: 24px;">◈</span> K-SYNCHRONY
+            </div>
+            
+            <nav class="nav-group">
+                <div class="nav-label">Documentation</div>
+                <a href="#" class="nav-item active">Overview</a>
+                <a href="#" class="nav-item">API Reference</a>
+                <a href="#" class="nav-item">Webhooks</a>
+            </nav>
+            
+            <nav class="nav-group">
+                <div class="nav-label">Resources</div>
+                <a href="https://github.com/Aaditya1273/Terravex-GreenAI" target="_blank" class="nav-item">GitHub Repository</a>
+                <a href="#" class="nav-item">Discord Support</a>
+            </nav>
+
+            <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border);">
+                <div class="nav-label">Status</div>
+                <div class="status-pills">
+                    <div class="pill success" id="backend-status">● Backend Live</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="doc-section">
+                <h1 class="doc-title">Bridge Infrastructure</h1>
+                <p class="doc-subtitle">High-performance programmable commerce engine connecting IoT devices to the Kaspa blockchain.</p>
+                
+                <div style="display: flex; gap: 16px;">
+                    <button class="btn-shiny" onclick="testHealth()">Health Check</button>
+                    <button class="btn-shiny" style="background: transparent; color: white; border: 1px solid var(--border);" onclick="testTrigger()">Simulate Trigger</button>
+                </div>
+            </header>
+
+            <section class="doc-section">
+                <h2>Quick Start</h2>
+                <p>Integrate your devices by pointing your request handler to our secure gateway. The infrastructure handles anchoring and verification automatically.</p>
+                
+                <div class="code-block">
+                    <div style="color: #666; margin-bottom: 8px;">// Endpoint Architecture</div>
+                    <div><span style="color: #4ade80;">POST</span> /api/trigger</div>
+                </div>
+
+                <div class="code-block">
+                    <div style="color: #666; margin-bottom: 8px;">// Example Payload</div>
+                    <pre style="margin: 0;">{
+  "device": "door_main",
+  "action": "unlock",
+  "sensor": "pulse"
+}</pre>
+                </div>
+            </section>
+
+            <section class="doc-section">
+                <h2>Technical Specifications</h2>
+                <p>K-Synchrony uses a dual-layer approach to ensure data integrity and low latency for real-time applications.</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px;">
+                    <div style="padding: 24px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-secondary);">
+                        <h4 style="margin-bottom: 8px;">Layer 1: Anchoring</h4>
+                        <p style="font-size: 14px; color: var(--text-secondary);">Direct proof-of-work security via Kaspa's BlockDAG architecture.</p>
+                    </div>
+                    <div style="padding: 24px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-secondary);">
+                        <h4 style="margin-bottom: 8px;">Layer 2: Logic</h4>
+                        <p style="font-size: 14px; color: var(--text-secondary);">Real-time programmable commerce engine for complex logic execution.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Live Terminal -->
+    <div class="terminal" id="terminal">
+        <div class="terminal-header">
+            <div class="terminal-dots">
+                <div class="dot" style="background: #ff5f56;"></div>
+                <div class="dot" style="background: #ffbd2e;"></div>
+                <div class="dot" style="background: #27c93f;"></div>
+            </div>
+            <div style="font-size: 11px; font-weight: 600; opacity: 0.5;">LIVE_TERMINAL</div>
         </div>
-        
-        <h2>📡 Available Endpoints:</h2>
-        
-        <div class="endpoint">
-            <strong>GET</strong> /api/health
-        </div>
-        
-        <div class="endpoint">
-            <strong>POST</strong> /api/trigger
-        </div>
-        
-        <h2>🧪 Test API:</h2>
-        
-        <button class="test-btn" onclick="testHealth()">Test Health Check</button>
-        <button class="test-btn" onclick="testTrigger()">Test Trigger</button>
-        
-        <div id="result"></div>
-        
-        <h2>📚 Documentation:</h2>
-        <p>This is the K-Synchrony backend API for ESP32 IoT devices with Kaspa blockchain integration.</p>
-        
-        <h3>ESP32 Usage:</h3>
-        <div class="endpoint">
-const char* serverUrl = "https://k-synchrony.vercel.app/api/trigger";
+        <div class="terminal-content" id="terminal-content">
+            <div class="line">Ready for transmission...</div>
         </div>
     </div>
 
     <script>
+        function logToTerminal(message, isResponse = false) {
+            const terminal = document.getElementById('terminal-content');
+            const div = document.createElement('div');
+            div.className = isResponse ? 'line response' : 'line';
+            
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+            div.innerHTML = `<span style="opacity: 0.4;">[${timestamp}]</span> ${message}`;
+            
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
         async function testHealth() {
-            const result = document.getElementById('result');
-            result.textContent = 'Testing /api/health...\n';
+            logToTerminal('GET /api/health initiating...');
             
             try {
                 const response = await fetch('/api/health');
                 const data = await response.json();
-                result.textContent = 'Response:\n' + JSON.stringify(data, null, 2);
+                logToTerminal('Status: ' + data.status.toUpperCase(), true);
+                logToTerminal(JSON.stringify(data, null, 2), true);
             } catch (error) {
-                result.textContent = 'Error: ' + error.message;
+                logToTerminal('Error: ' + error.message, true);
             }
         }
         
         async function testTrigger() {
-            const result = document.getElementById('result');
-            result.textContent = 'Testing /api/trigger...\n';
+            logToTerminal('POST /api/trigger initiating...');
             
             try {
                 const response = await fetch('/api/trigger', {
@@ -130,11 +144,18 @@ const char* serverUrl = "https://k-synchrony.vercel.app/api/trigger";
                     })
                 });
                 const data = await response.json();
-                result.textContent = 'Response:\n' + JSON.stringify(data, null, 2);
+                logToTerminal('SUCCESS: Blockchain Anchor confirmed', true);
+                logToTerminal(JSON.stringify(data, null, 2), true);
             } catch (error) {
-                result.textContent = 'Error: ' + error.message;
+                logToTerminal('Error: ' + error.message, true);
             }
         }
+
+        // Entrance animation handler
+        document.addEventListener('DOMContentLoaded', () => {
+            logToTerminal('K-Synchrony Node initialized.');
+            logToTerminal('Awaiting instructions.');
+        });
     </script>
 </body>
 </html>
